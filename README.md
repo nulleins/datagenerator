@@ -10,3 +10,5 @@ Example
     final Stream<String> results = StreamSupport.stream(matchit, false);
     System.out.println(results.collect(Collectors.joining("+")));
 ```    
+
+based on a solution by:[Marko Topolnik](http://stackoverflow.com/users/1103872/marko-topolnik)
