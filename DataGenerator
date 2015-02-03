@@ -1,0 +1,65 @@
+
+import java.util.List;
+import java.util.Random;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.joining;
+
+public class DataGenerator {
+  private static final int MIN_CHAR = 'A';
+  private static final int MAX_CHAR = 'Z';
+  private static final int MIN_DIGIT = '0';
+  private static final int MAX_DIGIT = '9';
+  private enum DataType {
+    A(() -> nextAlpha()), N(() -> nextNumber()),
+    AN(() -> nextBoolean() ? nextAlpha() : nextNumber());
+
+    private final Supplier<String> mapper;
+    DataType(final Supplier<String> mapper) {
+      this.mapper = mapper;
+    }
+    String nextValue() { return mapper.get(); }
+  }
+  private static final Random rgen = new Random();
+  private static final Pattern picture = Pattern.compile("(A|N|AN)\\((\\d+)\\)+");
+
+  public static String create(final String pattern) {
+    return MatchSpliterator.matcherStream(picture.matcher(pattern), m -> generateString(
+            DataType.valueOf(m.group(1)), Integer.valueOf(m.group(2))))
+      .collect(joining());
+  }
+
+  /** @return a random string of the specified {@code type} and {@code size} */
+  private static String generateString(final DataType type, final int size) {
+    return IntStream.range(0, size)
+      .mapToObj(i -> type.nextValue())
+      .collect(joining());
+  }
+
+  /** @return a randomly-selected element from {@code choices} */
+  public static String choose(final List<String> choices) {
+    return choices.get(next(0, choices.size() - 1));
+  }
+
+  /** @return a random single-character in the inclusive range {@code A..Z} */
+  private static String nextAlpha() {
+    return String.valueOf((char)next(MIN_CHAR, MAX_CHAR));
+  }
+
+  /** @return a random single-character in the inclusive range {@code 0..9} */
+  private static String nextNumber() {
+    return String.valueOf((char)next(MIN_DIGIT, MAX_DIGIT));
+  }
+
+  /** @return true or false, randomly */
+  private static boolean nextBoolean() {
+    return next(0, 1) == 0;
+  }
+
+  /** @return a random number in the inclusive range {@code min..max} */
+  private static int next(int min, int max) {
+    return rgen.nextInt((max - min) + 1) + min;
+  }
+}
