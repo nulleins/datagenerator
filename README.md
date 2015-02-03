@@ -1,14 +1,14 @@
-# matchspliterator
-A `Spliterator` capable traversing and partitioning elements from a regular expression `Matcher`, applying a `Consumer` to act 
-upon the matching text
+# DataGenerator
+Utility to create test data strings, specified by a 'picture' definition, e.g.,
+* `A(12)` - alphabetic string, twelve characters long
+* `N(2)` - numeric string, two characters long
+* `AN(20)` - alpha-numeric string, twent characters long
+* `A(1),N(8)` - a single alphabetic character, followed by a eight-digit number
 
 Example
 -------
 ``` java
-    final Matcher matcher = Pattern.compile("\\d+").matcher("12: this text contains 3 numbers (123)");
-    final MatchSpliterator matchit = new MatchSpliterator(matcher, m -> m.group());
-    final Stream<String> results = StreamSupport.stream(matchit, false);
-    System.out.println(results.collect(Collectors.joining("+")));
+final String code = DataGenerator.create("A(2),N(1)");
 ```    
 
-based on a solution by:[Marko Topolnik](http://stackoverflow.com/users/1103872/marko-topolnik)
+(solution uses a matcher/stream utility based on a solution by:[Marko Topolnik](http://stackoverflow.com/users/1103872/marko-topolnik))
