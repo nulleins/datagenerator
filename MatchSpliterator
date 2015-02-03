@@ -1,0 +1,39 @@
+import java.util.Spliterators.AbstractSpliterator;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+
+/** A <i>Spliterator</i> capable traversing and partitioning elements from a regular
+  * expression {@link Matcher}, applying a {@link Consumer} to act upon the matching text;
+  * Example:<pre>
+  * final Matcher matcher = Pattern.compile("\\d+").matcher("12: this text contains 3 numbers (123)");
+  * final MatchSpliterator matchit = new MatchSpliterator(matcher, m -&gt; m.group());
+  * final Stream&lt;String&gt; results = StreamSupport.stream(matchit, false);
+  * System.out.println(results.collect(Collectors.joining("+")));
+  * </pre> */
+public class MatchSpliterator extends AbstractSpliterator<String> {
+  private final Matcher matcher;
+  private final Function<Matcher, String> consumer;
+
+  /** Creates a spliterator that will use the supplied {@code matcher} to partition the
+    * source, and a {@code consumer} to process matched regions */
+  public MatchSpliterator(final Matcher matcher, final Function<Matcher, String> consumer) {
+    super(Long.MAX_VALUE, ORDERED | NONNULL | IMMUTABLE);
+    this.matcher = matcher;
+    this.consumer = consumer;
+  }
+
+  /** @return true if the input matches ({@link Matcher#find}), calling the consumer's
+    * {@link Consumer#accept} with the matching text; else returns false, indicating
+    * that the traversal of the source has terminated */
+  @Override
+  public boolean tryAdvance(Consumer<? super String> action) {
+    if (matcher.find()) {
+      action.accept(consumer.apply(matcher));
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+}
